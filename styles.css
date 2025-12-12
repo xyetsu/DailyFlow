@@ -1,8 +1,323 @@
-/*
+/* =========================================
+   DAILY FLOW (DF) - GLOBAL CONTAINER
+   ========================================= */
+.df-container {
+	padding: 6px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	font-size: 0.9em;
+	font-family: var(--font-interface);
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* =========================================
+   HEADER & NAVIGATION
+   ========================================= */
+.df-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
 
-If your plugin does not need CSS, delete this file.
+.df-nav-group {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
 
-*/
+.df-nav-btn {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	padding: 2px 6px;
+	cursor: pointer;
+	color: var(--text-muted);
+	font-size: 1.1em;
+	border-radius: 4px;
+}
+.df-nav-btn:hover {
+	color: var(--text-normal);
+	background-color: var(--background-modifier-hover);
+}
+
+.df-date-title {
+	font-weight: 600;
+	font-size: 1em;
+	min-width: 85px;
+	text-align: center;
+	user-select: none;
+	color: var(--text-normal);
+}
+
+.df-today-btn {
+	font-size: 0.75em;
+	padding: 3px 8px;
+	height: 24px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+/* =========================================
+   HABITS (YAML PROPERTIES)
+   ========================================= */
+.df-habits-list {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin-bottom: 10px;
+	width: 100%;
+}
+
+.df-habit-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 3px 6px;
+	border-radius: 4px;
+	min-height: 26px;
+	width: 100%;
+	transition: background-color 0.15s ease;
+}
+.df-habit-row:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.df-habit-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--text-muted);
+	font-size: 0.9em;
+	font-weight: 400;
+}
+.df-habit-icon svg {
+	width: 15px;
+	height: 15px;
+	stroke: currentColor;
+	opacity: 0.7;
+	display: block;
+}
+
+/* Инпуты привычек */
+.df-habit-input {
+	width: 40px;
+	text-align: right;
+	height: 16px !important;
+	padding: 0 4px;
+	font-size: 0.85em;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+}
+.df-habit-checkbox {
+	margin: 0;
+	cursor: pointer;
+}
+
+/* =========================================
+   LOG LIST (EVENTS) - MESSAGE STYLE
+   ========================================= */
+
+/* АГРЕССИВНЫЙ СБРОС СТИЛЕЙ СПИСКА */
+/* Целимся через родителя и используем !important для удаления маркеров и отступов */
+.df-container ul.df-log-list {
+	list-style: none !important; /* Сбрасывает все стили списка: type, image, position */
+	list-style-type: none !important;
+	padding: 0 !important;
+	margin: 8px 0 !important;
+	flex-grow: 1;
+}
+
+/* Сброс стилей для элементов списка */
+.df-container ul.df-log-list li.df-event-card {
+	list-style: none !important;
+	list-style-type: none !important;
+	margin-left: 0 !important;
+}
+
+/* Карточка события (Flex контейнер) */
+.df-event-card {
+	display: flex !important; /* ПРИНУДИТЕЛЬНЫЙ FLEX */
+	flex-direction: row !important; /* Гарантируем горизонтальное расположение */
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 8px;
+
+	padding: 6px 8px;
+	margin-bottom: 4px;
+
+	background-color: var(--background-secondary);
+	border-left: 3px solid var(--interactive-accent);
+	border-radius: 0 4px 4px 0;
+
+	transition: transform 0.1s ease;
+	font-size: 10px !important;
+}
+
+/* Левая часть: Текст */
+.df-event-text {
+	flex: 1; /* Растягивается */
+	min-width: 0;
+	word-break: break-word;
+	font-size: 0.95em;
+	line-height: 1.4;
+	color: var(--text-normal);
+}
+
+/* Правая часть: Мета (Flex контейнер) */
+.df-event-meta {
+	display: flex !important; /* ПРИНУДИТЕЛЬНЫЙ FLEX, чтобы элементы были в ряд */
+	flex-direction: row !important;
+	align-items: center;
+	gap: 6px;
+	white-space: nowrap;
+	flex-shrink: 0;
+	padding-top: 1px;
+}
+
+.df-event-time {
+	font-size: 0.75em;
+	color: var(--text-muted);
+	font-family: var(--font-monospace);
+	opacity: 0.8;
+}
+
+/* Бейдж ключа */
+.df-key-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+
+	font-size: 0.8em;
+	color: var(--text-muted);
+	background-color: rgba(125, 125, 125, 0.1);
+	padding: 2px 5px;
+	border-radius: 4px;
+}
+.df-key-icon {
+	font-size: 1.1em;
+	line-height: 1;
+	display: flex;
+	align-items: center;
+}
+
+/* =========================================
+   INPUT FORM
+   ========================================= */
+.df-input-form {
+	display: flex;
+	gap: 6px;
+	margin-top: auto;
+	padding-top: 10px;
+	border-top: 1px solid var(--background-modifier-border);
+	align-items: center;
+}
+
+.df-input-time {
+	width: 60px !important;
+	height: 28px;
+	font-size: 0.85em !important;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	position: relative;
+}
+.df-input-time::-webkit-calendar-picker-indicator {
+	opacity: 0.7;
+	cursor: pointer;
+	position: absolute; /* Делаем позиционирование абсолютным */
+	right: 2px; /* Прикрепляем к правому краю (с небольшим отступом) */
+	top: 50%; /* Выравниваем по центру по вертикали */
+	transform: translateY(-50%);
+}
+.df-input-text {
+	flex-grow: 1;
+	height: 28px;
+	font-size: 0.9em;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 0 8px;
+}
+
+.df-input-select {
+	width: 45px;
+	height: 28px;
+	padding: 0;
+	text-align: center;
+	cursor: pointer;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+}
+
+/* Служебные */
+.df-msg-error {
+	color: var(--text-error);
+	font-size: 0.8em;
+}
+.df-msg-empty {
+	color: var(--text-muted);
+	text-align: center;
+	margin-top: 20px;
+	font-size: 0.9em;
+}
+/* Добавляем область для кнопок управления */
+.df-event-controls {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	opacity: 0; /* Скрываем по умолчанию */
+	transition: opacity 0.2s ease;
+	flex-shrink: 0;
+}
+
+/* Показываем кнопки при наведении на карточку */
+.df-event-card:hover .df-event-controls {
+	opacity: 1;
+}
+
+/* Кнопки управления */
+.df-control-btn {
+	background: none;
+	border: none;
+	padding: 2px;
+	cursor: pointer;
+	color: var(--text-muted);
+	line-height: 1;
+}
+.df-control-btn:hover {
+	color: var(--interactive-accent);
+}
+.df-control-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Стиль для элемента, который можно тащить */
+.df-drag-handle {
+	cursor: grab;
+	margin-right: 6px;
+	color: var(--text-faint);
+}
+
+/* Стиль для режима перетаскивания */
+.df-event-card.is-dragging {
+	opacity: 0.5;
+	background-color: var(--background-modifier-hover);
+}
+
+/* Стиль для места, куда можно бросить (пригодится для D&D) */
+.df-event-card.drag-over {
+	border-bottom: 2px solid var(--interactive-accent);
+}
