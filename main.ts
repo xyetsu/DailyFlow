@@ -81,6 +81,13 @@ export default class DailyLogPlugin extends Plugin {
 		}
 		if (leaf) workspace.revealLeaf(leaf);
 	}
+	updateCssVariables() {
+		// Устанавливаем переменную на элемент body, чтобы она была доступна везде
+		document.body.style.setProperty(
+			"--df-hover-edit-size",
+			`${this.settings.hoverEditButtonSize}px`
+		);
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(
@@ -88,6 +95,7 @@ export default class DailyLogPlugin extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData()
 		);
+		this.updateCssVariables();
 	}
 
 	async saveSettings() {
@@ -98,5 +106,6 @@ export default class DailyLogPlugin extends Plugin {
 			.forEach((leaf) => {
 				if (leaf.view instanceof DailyLogView) leaf.view.render();
 			});
+		this.updateCssVariables();
 	}
 }

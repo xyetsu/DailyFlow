@@ -2,7 +2,6 @@
    DAILY FLOW (DF) - GLOBAL CONTAINER
    ========================================= */
 .df-container {
-	padding: 6px;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
@@ -30,21 +29,6 @@
 	gap: 4px;
 }
 
-.df-nav-btn {
-	background: transparent;
-	border: none;
-	box-shadow: none;
-	padding: 2px 6px;
-	cursor: pointer;
-	color: var(--text-muted);
-	font-size: 1.1em;
-	border-radius: 4px;
-}
-.df-nav-btn:hover {
-	color: var(--text-normal);
-	background-color: var(--background-modifier-hover);
-}
-
 .df-date-title {
 	font-weight: 600;
 	font-size: 1em;
@@ -54,26 +38,14 @@
 	color: var(--text-normal);
 }
 
-.df-today-btn {
-	font-size: 0.75em;
-	padding: 3px 8px;
-	height: 24px;
-	background-color: var(--interactive-accent);
-	color: var(--text-on-accent);
-	border: none;
-	border-radius: 4px;
-	cursor: pointer;
-	font-weight: 500;
-}
-
 /* =========================================
    HABITS (YAML PROPERTIES)
    ========================================= */
 .df-habits-list {
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
-	margin-bottom: 10px;
+	gap: 0px;
+	margin-bottom: 0px;
 	width: 100%;
 }
 
@@ -81,9 +53,9 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 3px 6px;
+	padding: 0px;
 	border-radius: 4px;
-	min-height: 26px;
+	min-height: 16px;
 	width: 100%;
 	transition: background-color 0.15s ease;
 }
@@ -94,10 +66,10 @@
 .df-habit-label {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	color: var(--text-muted);
-	font-size: 0.9em;
-	font-weight: 400;
+	gap: 4px;
+	color: rgb(157, 157, 157);
+	font-size: 9.5px;
+	font-weight: 600;
 }
 .df-habit-icon svg {
 	width: 15px;
@@ -112,16 +84,20 @@
 	width: 40px;
 	text-align: right;
 	height: 16px !important;
-	padding: 0 4px;
+	padding: 4px !important;
 	font-size: 0.85em;
 	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
+	border-radius: 4px !important;
 	background-color: var(--background-primary);
 	color: var(--text-normal);
+	box-shadow: none !important;
 }
 .df-habit-checkbox {
-	margin: 0;
+	margin: 0 1px 0 0 !important;
+	width: 13.75px !important;
+	height: 13.75px !important;
 	cursor: pointer;
+	background: rgb(40, 40, 40) !important;
 }
 
 /* =========================================
@@ -134,7 +110,7 @@
 	list-style: none !important; /* Сбрасывает все стили списка: type, image, position */
 	list-style-type: none !important;
 	padding: 0 !important;
-	margin: 8px 0 !important;
+	margin: 0 !important;
 	flex-grow: 1;
 }
 
@@ -150,15 +126,15 @@
 	display: flex !important; /* ПРИНУДИТЕЛЬНЫЙ FLEX */
 	flex-direction: row !important; /* Гарантируем горизонтальное расположение */
 	justify-content: space-between;
-	align-items: flex-start;
+	align-items: center !important;
 	gap: 8px;
-
-	padding: 6px 8px;
-	margin-bottom: 4px;
+	height: auto !important;
+	padding: 2px 4px 2px 6px !important;
+	margin-bottom: 3px;
 
 	background-color: var(--background-secondary);
 	border-left: 3px solid var(--interactive-accent);
-	border-radius: 0 4px 4px 0;
+	border-radius: 4px;
 
 	transition: transform 0.1s ease;
 	font-size: 10px !important;
@@ -168,41 +144,81 @@
 .df-event-text {
 	flex: 1; /* Растягивается */
 	min-width: 0;
-	word-break: break-word;
-	font-size: 0.95em;
+	white-space: pre-wrap !important; /* Сохраняет пробелы, но переносит текст */
+	word-break: break-word !important; /* Переносит длинные слова */
+	overflow-wrap: anywhere !important; /* Для длинных ссылок без пробелов */
+
+	font-size: 10.5px;
 	line-height: 1.4;
 	color: var(--text-normal);
 }
-
-/* Правая часть: Мета (Flex контейнер) */
-.df-event-meta {
-	display: flex !important; /* ПРИНУДИТЕЛЬНЫЙ FLEX, чтобы элементы были в ряд */
-	flex-direction: row !important;
+.df-event-left {
+	position: relative;
+	display: flex;
 	align-items: center;
 	gap: 6px;
+	flex: 1;
+	min-width: 0;
+}
+.df-event-left .df-event-text {
+	flex: 1 1 auto;
+	display: block;
+}
+/* Правая часть: Мета (Flex контейнер) */
+.df-event-meta {
+	position: relative; /* важно для абсолютного позиционирования контролов */
+	display: flex !important;
+	flex-direction: row !important;
+	align-items: center;
 	white-space: nowrap;
 	flex-shrink: 0;
-	padding-top: 1px;
+	margin-left: auto; /* прижать вправо */
 }
-
+.df-meta-group {
+	display: flex;
+	align-items: center;
+	gap: 3px; /* Отступ между временем и бейджем */
+	transition: transform 0.12s ease; /* Анимация сдвига на группе */
+}
 .df-event-time {
 	font-size: 0.75em;
 	color: var(--text-muted);
 	font-family: var(--font-monospace);
 	opacity: 0.8;
 }
-
-/* Бейдж ключа */
 .df-key-badge {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	gap: 2px;
+	border-radius: 6px;
+	background: transparent;
+	/* По умолчанию — нет трансформации; при hover смещаем влево */
+}
 
-	font-size: 0.8em;
+.df-edit-buttons {
+	display: flex;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+.df-delete-btn {
+	background: var(--danger);
+	color: var(--text-on-danger);
+	border-radius: 6px;
+	padding: 4px 8px;
+}
+
+/* Убедитесь, что inline time/recordedTime стили присутствуют */
+.df-time-inline {
+	color: var(--interactive-accent);
+	font-weight: 600;
+	font-family: var(--font-monospace);
+}
+.df-recorded-time {
+	font-size: 8px;
 	color: var(--text-muted);
-	background-color: rgba(125, 125, 125, 0.1);
-	padding: 2px 5px;
-	border-radius: 4px;
+	font-family: var(--font-monospace);
+	white-space: nowrap;
 }
 .df-key-icon {
 	font-size: 1.1em;
@@ -216,21 +232,35 @@
    ========================================= */
 .df-input-form {
 	display: flex;
-	gap: 6px;
-	margin-top: auto;
-	padding-top: 10px;
-	border-top: 1px solid var(--background-modifier-border);
+	gap: 4px;
+	margin-top: 4px;
 	align-items: center;
 }
+.df-input-form > .df-input-time {
+	height: 24px !important;
+}
+.df-input-form > .df-input-text {
+	height: 24px !important;
+}
+.df-input-form > .df-key-selector .ks-button {
+	height: 24px !important;
+}
 
+.df-edit-overlay > .df-input-form {
+	padding-top: 0px !important;
+	border-width: 0 !important;
+	height: 24px !important;
+}
 .df-input-time {
 	width: 60px !important;
-	height: 28px;
-	font-size: 0.85em !important;
+	height: 26px;
+	font-size: 9.75px !important;
 	background: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	position: relative;
+	padding: 2px 4px !important;
+	color: rgb(157, 157, 157);
 }
 .df-input-time::-webkit-calendar-picker-indicator {
 	opacity: 0.7;
@@ -242,23 +272,41 @@
 }
 .df-input-text {
 	flex-grow: 1;
-	height: 28px;
+	height: 26px !important;
 	font-size: 0.9em;
 	background: var(--background-primary);
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	padding: 0 8px;
+	box-shadow: none !important;
 }
 
 .df-input-select {
-	width: 45px;
-	height: 28px;
-	padding: 0;
-	text-align: center;
-	cursor: pointer;
-	background: var(--background-primary);
+	width: 38px; /* ровно под emoji */
+	height: 26px !important;
+	box-sizing: border-box;
+	padding: 0 6px; /* минимальные отступы, чтобы emoji не обрезалось */
 	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
 	border-radius: 4px;
+	text-align: center;
+	font-size: 14px; /* emoji видны */
+	line-height: 1;
+	-webkit-appearance: none; /* убрать стандартную стрелку (WebKit) */
+	-moz-appearance: none;
+	appearance: none;
+	overflow: hidden;
+}
+
+/* Убрать внутренний отступ в опциях (браузерные опции всё равно будут текстом) */
+.df-input-select option {
+	padding: 4px 8px;
+	text-align: left; /* когда раскрывается, текст левостится */
+}
+
+/* Для webkit: скрыть стрелку, добавить свой фон-стрелку, по желанию */
+.df-input-select::-ms-expand {
+	display: none;
 }
 
 /* Служебные */
@@ -272,43 +320,61 @@
 	margin-top: 20px;
 	font-size: 0.9em;
 }
-/* Добавляем область для кнопок управления */
 .df-event-controls {
+	position: absolute;
+	right: 6px;
+	top: 50%;
+	transform: translateY(-50%) translateX(8px); /* сдвинуты вправо (скрыты) */
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.12s ease, transform 0.12s ease;
 	display: flex;
-	align-items: center;
-	gap: 4px;
-	opacity: 0; /* Скрываем по умолчанию */
-	transition: opacity 0.2s ease;
-	flex-shrink: 0;
+	gap: 6px;
+	z-index: 2;
 }
 
 /* Показываем кнопки при наведении на карточку */
 .df-event-card:hover .df-event-controls {
+	transform: translateY(-50%) translateX(8px);
 	opacity: 1;
+	pointer-events: auto;
 }
-
+.df-event-card:hover .df-meta-group {
+	transform: translateX(
+		-18px
+	); /* сдвиг влево на 6px, подставьте нужное значение */
+}
 /* Кнопки управления */
 .df-control-btn {
 	background: none;
 	border: none;
 	padding: 2px;
 	cursor: pointer;
+	width: var(--df-hover-edit-size, 18px);
 	color: var(--text-muted);
 	line-height: 1;
+	height: var(--df-hover-edit-size, 18px);
+	font-size: 9px !important;
 }
 .df-control-btn:hover {
 	color: var(--interactive-accent);
 }
 .df-control-btn svg {
-	width: 14px;
-	height: 14px;
+	width: calc(var(--df-hover-edit-size, 18px) - 4px);
+	height: calc(var(--df-hover-edit-size, 18px) - 4px);
+	stroke-width: 2; /* Часто нужно для маленьких иконок */
 }
 
 /* Стиль для элемента, который можно тащить */
 .df-drag-handle {
+	position: absolute;
+	left: -6px; /* align with left border (border-left: 3px) */
+	top: 0;
+	bottom: 0;
+	width: 6px; /* narrow hit area */
 	cursor: grab;
-	margin-right: 6px;
-	color: var(--text-faint);
+	opacity: 0; /* visually hidden */
+	/* keep accessible for dragging (still receives pointer events) */
 }
 
 /* Стиль для режима перетаскивания */
@@ -319,5 +385,317 @@
 
 /* Стиль для места, куда можно бросить (пригодится для D&D) */
 .df-event-card.drag-over {
-	border-bottom: 2px solid var(--interactive-accent);
+	opacity: 0.6 !important;
+	border-bottom: 1px solid var(--interactive-accent);
+	padding-bottom: 1px !important;
+}
+
+/* inline time badge (влево от текста) */
+.df-event-inline-time {
+	display: inline-block;
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	padding: 2px 6px;
+	border-radius: 6px;
+	font-family: var(--font-monospace);
+	font-size: 0.8em;
+	font-weight: 600;
+	margin-right: 8px;
+	white-space: nowrap;
+}
+.df-edit-overlay {
+	box-sizing: border-box;
+	border-radius: 6px;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+	background: var(--interactive-accent);
+	z-index: 9999;
+}
+
+/* Hide original list item visually while editing (keep layout) */
+.df-editing-hidden {
+	visibility: hidden !important;
+}
+
+/* Slight padding-right so key badge has room and overlay not cover it */
+.df-event-meta {
+	padding-right: 0px;
+}
+.df-key-selector {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	min-width: 26px;
+	max-width: 240px;
+}
+.df-key-selector .ks-button {
+	width: 26px;
+	height: 26px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	cursor: pointer;
+	font-size: 12px;
+	padding: 0;
+	line-height: 1;
+	border-radius: 4px;
+	box-sizing: border-box;
+	overflow: visible; /* чтобы emoji/SVG не обрезалось */
+}
+.ks-button,
+.df-input-select {
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+}
+.ks-dropdown {
+	list-style: none !important; /* убрать bullets */
+	margin: 0;
+	padding: 6px 0;
+	background: var(
+		--background-primary
+	) !important; /* задать фон, чтобы не был прозрачным */
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+	z-index: 10060;
+	overflow: auto;
+}
+
+/* показываем dropdown когда контейнер имеет класс open */
+.df-key-selector.open .ks-dropdown {
+	display: block;
+}
+
+.ks-dropdown .ks-option {
+	display: block;
+	padding: 4px 6px !important;
+	cursor: pointer;
+	white-space: nowrap;
+	text-align: left; /* IMPORTANT: left align in dropdown */
+}
+.ks-dropdown .ks-option:hover {
+	background: var(--background-modifier-hover);
+}
+
+/* действия (svg links) — уменьшаем, чтобы не мешали селектору */
+.df-edit-actions {
+	display: inline-flex;
+	gap: 2px;
+	align-items: center;
+	margin-left: 4px;
+}
+.df-action-link {
+	height: 24px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.df-action-btn {
+	width: 24px;
+	height: 24px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	cursor: pointer; /* Делаем курсор рукой */
+	color: var(--text-muted); /* Цвет по умолчанию */
+	transition: color 0.1s ease, background-color 0.1s ease;
+}
+
+.df-action-btn:hover {
+	background-color: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* Специфичные цвета при наведении (опционально) */
+.df-action-btn.save:hover {
+	color: var(--interactive-accent);
+}
+.df-action-btn.delete:hover {
+	color: var(--text-error);
+}
+
+/* SVG внутри наследует цвет */
+.df-action-btn svg {
+	stroke: currentColor;
+}
+.df-today-btn {
+	padding: 0px 8px;
+	height: 22px;
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+/* ========== DATE BLOCK / ARROWS / RIGHT-CONTROLS ========== */
+/* Контейнер с датой: занимает всю ширину строки и выравнивает элементы по центру */
+.df-date-block {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	width: 100%;
+	box-sizing: border-box;
+	margin-top: 4px;
+}
+
+/* Стили для самого date input — делаем высоту совпадающей с .df-input-time */
+.df-date-input {
+	height: 22px !important;
+	line-height: 22px;
+	padding: 2px 8px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background: var(--background-primary);
+	font-size: 12px;
+	box-sizing: border-box;
+}
+
+/* Стрелки рядом с датой — same height, centered */
+.df-date-block > .df-nav-btn {
+	height: 22px;
+	min-width: 22px;
+	padding: 0 8px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	box-shadow: var(--input-shadow);
+	color: var(--text-muted);
+}
+
+/* Hover сохраняет вид, но можно подсветить */
+.df-date-block > .df-nav-btn:hover {
+	background: var(--background-modifier-hover);
+}
+
+/* Правая группа кнопок: прижимается к правому краю блока даты */
+.df-date-right-controls {
+	margin-left: auto; /* отталкивает от даты к правому краю */
+	display: flex;
+	gap: 4px;
+	align-items: center;
+}
+
+/* Кнопки "Сейчас" и "Добавить" — ровная высота и визуальный стиль */
+.df-now-btn,
+.df-add-btn {
+	height: 22px;
+	padding: 0 8px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-primary);
+	cursor: pointer;
+	box-sizing: border-box;
+	color: white !important;
+	font-size: 11px;
+}
+.df-now-btn {
+	background-color: var(--interactive-accent) !important;
+}
+/* Небольшая подсветка при наведении */
+.df-now-btn:hover,
+.df-add-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* Мобильный/узкий экран: аккуратно переносим правые кнопки вниз, не ломая интерфейс */
+@media (max-width: 520px) {
+	.df-date-block {
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.df-date-right-controls {
+		margin-left: 0;
+		width: 100%;
+		justify-content: flex-end;
+	}
+}
+/* =========================================
+   DIVIDER (DAY LOG STYLE)
+   ========================================= */
+.df-divider {
+	display: flex;
+	align-items: center;
+	margin: 0;
+	color: var(--text-muted);
+	font-size: 0.75em;
+	width: 100%;
+}
+
+.df-divider-label {
+	margin-right: 6px;
+	white-space: nowrap;
+}
+
+.df-divider-line {
+	flex-grow: 1;
+	height: 1px;
+	background: var(--text-muted);
+	opacity: 0.3; /* Чуть прозрачнее для эстетики */
+}
+/* --- Стили для Drag & Drop в настройках (DailyLogSettings.ts) --- */
+
+/* Ручка перетаскивания */
+.df-list-item-setting .df-drag-handle-btn .setting-extra-setting-button {
+	/* Используем SVG из настроек */
+	padding: 0;
+	margin: 0;
+}
+.df-list-item-setting .df-drag-handle-btn {
+	cursor: grab;
+	/* Убедимся, что ручка отображается правильно и в начале */
+	order: -1;
+	margin-right: 10px;
+}
+
+/* Общий стиль элемента для D&D */
+.df-list-item-setting.setting-item {
+	display: flex;
+	align-items: center;
+	border: 1px solid transparent;
+	transition: all 0.1s ease-out;
+}
+
+.df-list-item-setting.setting-item[draggable="true"]:hover {
+	background-color: var(--background-modifier-hover);
+	border-color: var(--background-modifier-border);
+}
+
+/* Визуальная обратная связь для перетаскиваемого элемента */
+.df-list-item-setting.is-dragging {
+	opacity: 0.4;
+	border: 1px dashed var(--interactive-accent) !important;
+}
+
+/* Визуальная обратная связь для целевого элемента */
+.df-list-item-setting.drag-over-top {
+	border-top: 2px solid var(--interactive-accent) !important;
+}
+.df-list-item-setting.drag-over-bottom {
+	border-bottom: 2px solid var(--interactive-accent) !important;
+}
+
+/* Предпросмотр иконки рядом с названием */
+.df-list-item-setting .setting-item-name {
+	display: flex;
+	align-items: center;
+}
+.df-list-icon-preview {
+	margin-left: 8px;
+	/* Стили для SVG */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 14px;
+	width: 14px;
 }
