@@ -5,7 +5,7 @@
 	height: 100%;
 	display: flex;
 	flex-direction: column;
-	overflow-y: auto;
+	overflow: hidden;
 	font-size: 0.9em;
 	font-family: var(--font-interface);
 }
@@ -98,6 +98,10 @@
 	height: 13.75px !important;
 	cursor: pointer;
 	background: rgb(40, 40, 40) !important;
+}
+.df-habit-checkbox::after {
+	width: 13.75px !important;
+	height: 13.75px !important;
 }
 
 /* =========================================
@@ -233,7 +237,7 @@
 .df-input-form {
 	display: flex;
 	gap: 4px;
-	margin-top: 4px;
+	margin: 1px 0 0 0;
 	align-items: center;
 }
 .df-input-form > .df-input-time {
@@ -403,6 +407,9 @@
 	margin-right: 8px;
 	white-space: nowrap;
 }
+.df-edit-overlay .ks-button {
+	box-shadow: none !important;
+}
 .df-edit-overlay {
 	box-sizing: border-box;
 	border-radius: 6px;
@@ -428,8 +435,8 @@
 	max-width: 240px;
 }
 .df-key-selector .ks-button {
-	width: 26px;
-	height: 26px;
+	width: 24px;
+	height: 24px;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -538,7 +545,7 @@
 	gap: 4px;
 	width: 100%;
 	box-sizing: border-box;
-	margin-top: 4px;
+	margin: 4px 0;
 }
 
 /* Стили для самого date input — делаем высоту совпадающей с .df-input-time */
@@ -698,4 +705,82 @@
 	justify-content: center;
 	height: 14px;
 	width: 14px;
+}
+/* =========================================
+   ON THIS DAY SECTION (Under divider)
+   ========================================= */
+
+.df-on-this-day-container {
+	/* Если блок пустой, он будет скрыт скриптом (display:none), 
+       так что отступы не помешают */
+	margin: 4px 0 10px 0;
+	padding-top: 4px;
+}
+
+.df-otd-header {
+	font-size: 0.75em;
+	font-weight: 600;
+	color: var(--text-muted);
+	margin-bottom: 6px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	opacity: 0.8;
+}
+
+/* Стили для summary/details */
+.df-otd-details {
+	margin-bottom: 4px;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	background-color: var(--background-primary-alt);
+	overflow: hidden;
+}
+
+.df-otd-summary {
+	padding: 4px 8px;
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.85em;
+	color: var(--text-normal);
+	outline: none;
+	user-select: none;
+	list-style: none; /* Убрать треугольник в некоторых браузерах */
+	display: flex;
+	align-items: center;
+}
+/* Восстанавливаем кастомный треугольник или используем дефолтный, если нужно */
+.df-otd-summary::-webkit-details-marker {
+	display: none;
+}
+.df-otd-summary::before {
+	content: "▶";
+	font-size: 0.7em;
+	margin-right: 6px;
+	transition: transform 0.1s;
+}
+.df-otd-details[open] .df-otd-summary::before {
+	transform: rotate(90deg);
+}
+
+.df-otd-summary:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.df-otd-content {
+	padding: 0 4px 4px 4px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+/* Стили для карточек "только чтение" */
+.df-readonly-card {
+	opacity: 0.85;
+	/* Убираем акцентный бордер, делаем его нейтральным */
+	border-left-color: var(--text-muted) !important;
+	padding-left: 8px !important; /* Компенсация отсутствия drag-ручки */
+	background-color: transparent !important; /* Прозрачный фон для отличия */
+}
+
+/* Скрываем лишние отступы в readonly списке */
+.df-otd-list {
+	margin: 0 !important;
 }
