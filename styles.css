@@ -66,10 +66,13 @@
 .df-habit-label {
 	display: flex;
 	align-items: center;
-	gap: 4px;
-	color: rgb(157, 157, 157);
-	font-size: 9.5px;
-	font-weight: 600;
+	gap: 6px;
+	color: var(--nav-item-color);
+	font-size: 9.75px;
+	font-weight: 400;
+}
+.df-habit-label > svg {
+	color: var(--nav-item-color);
 }
 .df-habit-icon svg {
 	width: 15px;
@@ -133,7 +136,7 @@
 	align-items: center !important;
 	gap: 8px;
 	height: auto !important;
-	padding: 2px 4px 2px 6px !important;
+	padding: 2px 6px 2px 6px !important;
 	margin-bottom: 3px;
 
 	background-color: var(--background-secondary);
@@ -180,6 +183,7 @@
 }
 .df-meta-group {
 	display: flex;
+	text-align: center;
 	align-items: center;
 	gap: 3px; /* Отступ между временем и бейджем */
 	transition: transform 0.12s ease; /* Анимация сдвига на группе */
@@ -196,6 +200,8 @@
 	gap: 2px;
 	border-radius: 6px;
 	background: transparent;
+	opacity: 0.7;
+	font-size: 9px;
 	/* По умолчанию — нет трансформации; при hover смещаем влево */
 }
 
@@ -220,6 +226,7 @@
 }
 .df-recorded-time {
 	font-size: 8px;
+	line-height: 12.15px;
 	color: var(--text-muted);
 	font-family: var(--font-monospace);
 	white-space: nowrap;
@@ -347,6 +354,9 @@
 	transform: translateX(
 		-18px
 	); /* сдвиг влево на 6px, подставьте нужное значение */
+}
+.df-event-card:hover .df-meta-group .df-key-badge {
+	opacity: 1 !important;
 }
 /* Кнопки управления */
 .df-control-btn {
