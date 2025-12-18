@@ -12,6 +12,7 @@ export default class DailyLogPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+		this.updateCssVariables();
 
 		// 1. Регистрируем боковую панель (View)
 		this.registerView(

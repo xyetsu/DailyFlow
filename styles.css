@@ -1,4 +1,13 @@
 /* =========================================
+   VARIABLES
+   ========================================= */
+body {
+	--df-time-inline-color: var(--interactive-accent);
+	--df-time-inline-weight: 400;
+	--df-habits-gap: 4px;
+	--df-habit-label-size: 9.75px; /* <-- НОВАЯ ПЕРЕМЕННАЯ */
+}
+/* =========================================
    DAILY FLOW (DF) - GLOBAL CONTAINER
    ========================================= */
 .df-container {
@@ -68,7 +77,7 @@
 	align-items: center;
 	gap: 6px;
 	color: var(--nav-item-color);
-	font-size: 9.75px;
+	font-size: var(--df-habit-label-size);
 	font-weight: 400;
 }
 .df-habit-label > svg {
@@ -220,8 +229,8 @@
 
 /* Убедитесь, что inline time/recordedTime стили присутствуют */
 .df-time-inline {
-	color: var(--interactive-accent);
-	font-weight: 600;
+	color: var(--df-time-inline-color);
+	font-weight: var(--df-time-inline-weight);
 	font-family: var(--font-monospace);
 }
 .df-recorded-time {
