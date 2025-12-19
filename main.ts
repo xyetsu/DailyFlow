@@ -1,93 +1,76 @@
-import { Plugin, WorkspaceLeaf, moment, TFile } from "obsidian";
-import { DailyLogView, VIEW_TYPE_DAILY_LOG } from "./DailyLogView";
-import { DailyLogEmbed } from "./DailyLogEmbed";
+import { Plugin, TFile, moment } from "obsidian";
 import {
-	DailyLogSettingTab,
 	DailyLogSettings,
 	DEFAULT_SETTINGS,
+	DailyLogSettingTab,
 } from "./DailyLogSettings";
+import { DailyLogEmbed } from "./DailyLogEmbed";
 
 export default class DailyLogPlugin extends Plugin {
 	settings: DailyLogSettings;
+	styleTag: HTMLStyleElement;
 
 	async onload() {
+		// 1. Загружаем настройки
 		await this.loadSettings();
+
+		// 2. Создаем тег для CSS переменных (для мобилок)
+		this.styleTag = document.createElement("style");
+		this.styleTag.id = "df-dynamic-styles";
+		document.head.appendChild(this.styleTag);
+
+		// 3. Применяем стили сразу
 		this.updateCssVariables();
 
-		// 1. Регистрируем боковую панель (View)
-		this.registerView(
-			VIEW_TYPE_DAILY_LOG,
-			(leaf) => new DailyLogView(leaf, this)
-		);
+		// 4. Добавляем вкладку настроек
+		this.addSettingTab(new DailyLogSettingTab(this.app, this));
 
-		// 2. Регистрируем Markdown блок (Embed)
+		// 5. Регистрируем блок кода
+		// Мы регистрируем обработчик, который сработает, когда Obsidian увидит ```daily-flow-embed
 		this.registerMarkdownCodeBlockProcessor(
 			"daily-flow-embed",
-			async (source, el, ctx) => {
-				let targetDate = moment().format("YYYY-MM-DD");
-
-				const sourceText = source.trim();
-				if (sourceText) {
-					const parsedDate = moment(
-						sourceText,
-						["YYYY-MM-DD", "YYYYMMDD"],
-						true
-					);
-					if (parsedDate.isValid()) {
-						targetDate = parsedDate.format("YYYY-MM-DD");
-					} else {
-						el.createEl("div", {
-							text: `Ошибка даты: "${sourceText}".`,
-							cls: "error-msg",
-						});
-						return;
-					}
-				}
-
-				const embedView = new DailyLogEmbed(el, this, targetDate);
-				await embedView.render();
+			(source, el, ctx) => {
+				this.handleCodeBlock(el, ctx);
 			}
 		);
 
-		// 3. Риббон и команды
-		this.addRibbonIcon("calendar-days", "Daily Flow", () =>
-			this.activateView()
+		// Добавляем алиас (короткое имя), чтобы работало и так, и так
+		this.registerMarkdownCodeBlockProcessor(
+			"dailylog",
+			(source, el, ctx) => {
+				this.handleCodeBlock(el, ctx);
+			}
 		);
-		this.addCommand({
-			id: "open-daily-flow",
-			name: "Открыть панель дня",
-			callback: () => this.activateView(),
-		});
-
-		// 4. Настройки
-		this.addSettingTab(new DailyLogSettingTab(this.app, this));
 	}
 
-	async activateView() {
-		const { workspace } = this.app;
-		let leaf: WorkspaceLeaf | null = null;
-		const leaves = workspace.getLeavesOfType(VIEW_TYPE_DAILY_LOG);
+	// Вынес логику в отдельную функцию, чтобы не дублировать
+	handleCodeBlock(el: HTMLElement, ctx: any) {
+		// Определяем дату файла
+		const file = this.app.vault.getAbstractFileByPath(ctx.sourcePath);
+		let dateStr = moment().format("YYYY-MM-DD");
 
-		if (leaves.length > 0) {
-			leaf = leaves[0];
-		} else {
-			const rightLeaf = workspace.getRightLeaf(false);
-			if (rightLeaf) {
-				leaf = rightLeaf;
-				await leaf.setViewState({
-					type: VIEW_TYPE_DAILY_LOG,
-					active: true,
-				});
+		if (file instanceof TFile) {
+			// Пытаемся взять дату из имени файла (формат YYYY-MM-DD)
+			const nameDate = moment(file.basename, "YYYY-MM-DD", true);
+			if (nameDate.isValid()) {
+				dateStr = nameDate.format("YYYY-MM-DD");
 			}
 		}
-		if (leaf) workspace.revealLeaf(leaf);
+
+		// Создаем экземпляр нашего интерфейса
+		const embed = new DailyLogEmbed(el, this, dateStr);
+
+		// Рендерим СРАЗУ, чтобы не было пустого поля
+		embed.render();
+
+		// (Опционально) Если DailyLogEmbed имеет методы очистки, их можно привязать к onunload
+		// Но так как это простой класс, этого достаточно.
 	}
-	updateCssVariables() {
-		// Устанавливаем переменную на элемент body, чтобы она была доступна везде
-		document.body.style.setProperty(
-			"--df-hover-edit-size",
-			`${this.settings.hoverEditButtonSize}px`
-		);
+
+	onunload() {
+		if (this.styleTag) {
+			this.styleTag.remove();
+		}
 	}
 
 	async loadSettings() {
@@ -96,17 +79,24 @@ export default class DailyLogPlugin extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData()
 		);
-		this.updateCssVariables();
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
-		// Обновляем открытые View
-		this.app.workspace
-			.getLeavesOfType(VIEW_TYPE_DAILY_LOG)
-			.forEach((leaf) => {
-				if (leaf.view instanceof DailyLogView) leaf.view.render();
-			});
 		this.updateCssVariables();
+	}
+
+	updateCssVariables() {
+		const s = this.settings;
+		const css = `
+			body {
+				--df-hover-edit-size: ${s.hoverEditButtonSize}px;
+				--df-time-inline-color: ${s.timeInlineColor};
+				--df-time-inline-weight: ${s.timeInlineWeight};
+				--df-habits-gap: ${s.habitsGap}px;
+				--df-habit-label-size: ${s.habitLabelFontSize}px;
+			}
+		`;
+		this.styleTag.innerHTML = css;
 	}
 }

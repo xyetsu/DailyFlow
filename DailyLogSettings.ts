@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting, Notice, Modal } from "obsidian";
 import type DailyLogPlugin from "./main";
 
-// --- Интерфейсы ---
+// --- Интерфейсы настроек ---
 export interface HabitConfig {
 	key: string;
 	type: "checkbox" | "number" | "text";
@@ -9,7 +9,7 @@ export interface HabitConfig {
 }
 
 export interface LogKeyConfig {
-	key: string; // will be stored normalized ending with ::
+	key: string;
 	iconSvg: string;
 	tags: string;
 }
@@ -28,7 +28,7 @@ export interface DailyLogSettings {
 	timeInlineColor: string;
 	timeInlineWeight: string;
 	habitsGap: number;
-	habitLabelFontSize: number; // <-- НОВАЯ НАСТРОЙКА
+	habitLabelFontSize: number;
 }
 
 // --- Настройки по умолчанию ---
@@ -63,10 +63,12 @@ export const DEFAULT_SETTINGS: DailyLogSettings = {
 	timeInlineColor: "var(--interactive-accent)",
 	timeInlineWeight: "600",
 	habitsGap: 4,
-	habitLabelFontSize: 13, // Размер шрифта по умолчанию (px)
+	habitLabelFontSize: 13,
 };
 
-// --- Вспомогательный класс для модального окна редактирования SVG ---
+// --- Модальные окна ---
+
+// 1. Базовое окно редактирования SVG
 class EditSvgModal extends Modal {
 	name: string;
 	initialSvg: string;
@@ -85,33 +87,32 @@ class EditSvgModal extends Modal {
 	}
 
 	onOpen() {
-		const { contentEl, titleEl } = this;
-		titleEl.setText(`Редактировать иконку: ${this.name}`);
+		const { contentEl } = this;
+		this.titleEl.setText(`Редактировать иконку: ${this.name}`);
 		contentEl.addClass("df-edit-svg-modal");
 
 		let svgTextArea: HTMLTextAreaElement;
 
 		new Setting(contentEl)
-			.setName("SVG-код иконки")
-			.setDesc("Вставьте сюда полный SVG-код.")
+			.setName("SVG-код")
+			.setDesc("Вставьте полный SVG код")
 			.setClass("df-svg-textarea-setting")
 			.addTextArea((text) => {
 				svgTextArea = text.inputEl;
-				svgTextArea.rows = 8;
+				svgTextArea.rows = 6;
 				svgTextArea.value = this.initialSvg;
+				svgTextArea.style.width = "100%";
 			});
 
-		if (this.initialSvg.trim()) {
-			new Setting(contentEl)
-				.setName("Предпросмотр")
-				.setClass("df-svg-preview-setting")
-				.addButton((btn) => {
-					btn
-						.setClass("df-svg-preview-btn")
-						.setButtonText("").buttonEl.innerHTML = this.initialSvg;
-					btn.buttonEl.style.color = "var(--interactive-accent)";
-				});
-		}
+		// Preview
+		new Setting(contentEl)
+			.setName("Предпросмотр")
+			.setClass("df-svg-preview-setting")
+			.addButton((btn) => {
+				btn.setClass("df-svg-preview-btn").setButtonText("");
+				btn.buttonEl.innerHTML = this.initialSvg || "❓";
+				btn.buttonEl.style.color = "var(--interactive-accent)";
+			});
 
 		new Setting(contentEl)
 			.addButton((btn) =>
@@ -124,18 +125,15 @@ class EditSvgModal extends Modal {
 					})
 			)
 			.addButton((btn) =>
-				btn.setButtonText("Отмена").onClick(() => {
-					this.close();
-				})
+				btn.setButtonText("Отмена").onClick(() => this.close())
 			);
 	}
-
 	onClose() {
 		this.contentEl.empty();
 	}
 }
 
-// --- Класс модального окна для редактирования привычки ---
+// 2. Окно редактирования привычки (Название + SVG)
 class EditHabitModal extends EditSvgModal {
 	habit: HabitConfig;
 	onSaveHabit: (key: string, svg: string) => void;
@@ -151,151 +149,45 @@ class EditHabitModal extends EditSvgModal {
 	}
 
 	onOpen() {
-		const { contentEl, titleEl } = this;
-		titleEl.setText(`Редактировать привычку: ${this.habit.key}`);
-		contentEl.addClass("df-edit-svg-modal");
+		super.onOpen();
+		this.titleEl.setText(`Редактировать привычку`);
 
-		let keyInput: HTMLInputElement;
-		let svgTextArea: HTMLTextAreaElement;
-
-		new Setting(contentEl)
-			.setName("Название привычки (Ключ)")
-			.setDesc("Это значение будет сохранено в YAML-свойствах файла.")
-			.addText((text) => {
-				keyInput = text.inputEl;
-				text.setValue(this.habit.key);
-			});
-
-		new Setting(contentEl)
-			.setName("SVG-код иконки")
-			.setDesc("Вставьте сюда полный SVG-код.")
-			.setClass("df-svg-textarea-setting")
-			.addTextArea((text) => {
-				svgTextArea = text.inputEl;
-				svgTextArea.rows = 8;
-				svgTextArea.value = this.habit.iconSvg;
-			});
-
-		new Setting(contentEl)
-			.setName("Предпросмотр")
-			.setClass("df-svg-preview-setting")
-			.addButton((btn) => {
-				btn
-					.setClass("df-svg-preview-btn")
-					.setButtonText("").buttonEl.innerHTML =
-					this.habit.iconSvg || "...";
-				btn.buttonEl.style.color = "var(--interactive-accent)";
-				btn.setTooltip("Текущий вид иконки");
-			});
-
-		new Setting(contentEl)
-			.addButton((btn) =>
-				btn
-					.setButtonText("Сохранить")
-					.setCta()
-					.onClick(() => {
-						const newKey = keyInput.value.trim();
-						const newSvg = svgTextArea.value.trim();
-						if (!newKey) {
-							new Notice(
-								"Название привычки не может быть пустым."
-							);
-							return;
-						}
-						this.onSaveHabit(newKey, newSvg);
-						this.close();
-					})
-			)
-			.addButton((btn) =>
-				btn.setButtonText("Отмена").onClick(() => {
-					this.close();
-				})
+		const container = this.contentEl;
+		// Вставляем поле имени в начало контейнера (перед SVG)
+		const nameDiv = document.createElement("div");
+		const nameSetting = new Setting(nameDiv)
+			.setName("Название")
+			.addText((t) =>
+				t.setValue(this.habit.key).onChange((v) => (this.habit.key = v))
 			);
+
+		container.prepend(nameDiv);
+
+		// Переопределяем логику сохранения
+		this.onSave = (svg) => {
+			this.onSaveHabit(this.habit.key, svg);
+		};
 	}
 }
 
-// --- Класс модального окна для редактирования ключа лога ---
+// 3. Окно редактирования ключа лога
 class EditLogKeyModal extends EditHabitModal {
-	logKey: LogKeyConfig;
-	onSaveLogKey: (key: string, svg: string) => void;
-
 	constructor(
 		app: App,
 		logKey: LogKeyConfig,
 		onSave: (key: string, svg: string) => void
 	) {
+		// Используем ту же структуру, что и для привычек
 		super(
 			app,
 			{ key: logKey.key, type: "text", iconSvg: logKey.iconSvg },
-			() => {}
+			onSave
 		);
-		this.logKey = logKey;
-		this.onSaveLogKey = onSave;
-	}
-
-	onOpen() {
-		const { contentEl, titleEl } = this;
-		titleEl.setText(`Редактировать ключ лога: ${this.logKey.key}`);
-		contentEl.addClass("df-edit-svg-modal");
-
-		let keyInput: HTMLInputElement;
-		let svgTextArea: HTMLTextAreaElement;
-
-		new Setting(contentEl)
-			.setName("Ключ лога (например, 'Идея::')")
-			.setDesc("Ключ будет нормализован и должен заканчиваться на '::'.")
-			.addText((text) => {
-				keyInput = text.inputEl;
-				text.setValue(this.logKey.key);
-			});
-
-		new Setting(contentEl)
-			.setName("SVG-код иконки")
-			.setDesc("Вставьте сюда полный SVG-код.")
-			.setClass("df-svg-textarea-setting")
-			.addTextArea((text) => {
-				svgTextArea = text.inputEl;
-				svgTextArea.rows = 8;
-				svgTextArea.value = this.logKey.iconSvg;
-			});
-
-		new Setting(contentEl)
-			.setName("Предпросмотр")
-			.setClass("df-svg-preview-setting")
-			.addButton((btn) => {
-				btn
-					.setClass("df-svg-preview-btn")
-					.setButtonText("").buttonEl.innerHTML =
-					this.logKey.iconSvg || "❓";
-				btn.buttonEl.style.color = "var(--interactive-accent)";
-				btn.setTooltip("Текущий вид иконки");
-			});
-
-		new Setting(contentEl)
-			.addButton((btn) =>
-				btn
-					.setButtonText("Сохранить")
-					.setCta()
-					.onClick(() => {
-						const newKey = keyInput.value.trim();
-						const newSvg = svgTextArea.value.trim();
-						if (!newKey) {
-							new Notice("Ключ лога не может быть пустым.");
-							return;
-						}
-						this.onSaveLogKey(newKey, newSvg);
-						this.close();
-					})
-			)
-			.addButton((btn) =>
-				btn.setButtonText("Отмена").onClick(() => {
-					this.close();
-				})
-			);
+		this.titleEl.setText(`Редактировать ключ лога`);
 	}
 }
 
-// --- Tab Settings ---
+// --- Вкладка настроек ---
 export class DailyLogSettingTab extends PluginSettingTab {
 	plugin: DailyLogPlugin;
 
@@ -321,19 +213,19 @@ export class DailyLogSettingTab extends PluginSettingTab {
 		containerEl.empty();
 		containerEl.createEl("h2", { text: "Настройки Daily Flow" });
 
-		// --- STYLES SETTINGS ---
+		// --- СТИЛИ ---
 		containerEl.createEl("h3", { text: "Внешний вид" });
 
 		new Setting(containerEl)
-			.setName("Размер кнопки редактирования (по наведению)")
-			.setDesc("px")
+			.setName("Размер кнопки редактирования")
+			.setDesc("px (по наведению)")
 			.addText((text) =>
 				text
 					.setPlaceholder("18")
 					.setValue(
 						this.plugin.settings.hoverEditButtonSize.toString()
 					)
-					.onChange(async (value: string) => {
+					.onChange(async (value) => {
 						const num = parseInt(value.trim());
 						if (!isNaN(num)) {
 							this.plugin.settings.hoverEditButtonSize = num;
@@ -344,28 +236,30 @@ export class DailyLogSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Цвет времени в тексте")
-			.setDesc("df-time-inline (CSS цвет)")
+			.setDesc("CSS цвет (например: var(--text-muted) или red)")
 			.addText((text) =>
 				text
 					.setValue(this.plugin.settings.timeInlineColor)
-					.onChange(async (val: string) => {
+					.onChange(async (val) => {
 						this.plugin.settings.timeInlineColor = val;
 						await this.plugin.saveSettings();
 					})
 			);
 
 		new Setting(containerEl)
-			.setName("Жирность времени")
-			.setDesc("df-time-inline")
-			.addDropdown((dd) =>
-				dd
-					.addOption("400", "Normal")
-					.addOption("600", "Semi-Bold")
-					.addOption("700", "Bold")
-					.setValue(this.plugin.settings.timeInlineWeight)
-					.onChange(async (val: string) => {
-						this.plugin.settings.timeInlineWeight = val;
-						await this.plugin.saveSettings();
+			.setName("Размер шрифта привычек")
+			.setDesc("px (для названий привычек)")
+			.addText((text) =>
+				text
+					.setValue(
+						this.plugin.settings.habitLabelFontSize.toString()
+					)
+					.onChange(async (val) => {
+						const num = parseInt(val);
+						if (!isNaN(num)) {
+							this.plugin.settings.habitLabelFontSize = num;
+							await this.plugin.saveSettings();
+						}
 					})
 			);
 
@@ -375,7 +269,7 @@ export class DailyLogSettingTab extends PluginSettingTab {
 			.addText((text) =>
 				text
 					.setValue(this.plugin.settings.habitsGap.toString())
-					.onChange(async (val: string) => {
+					.onChange(async (val) => {
 						const num = parseInt(val);
 						if (!isNaN(num)) {
 							this.plugin.settings.habitsGap = num;
@@ -384,28 +278,8 @@ export class DailyLogSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// <-- НОВАЯ НАСТРОЙКА: Размер шрифта привычек
-		new Setting(containerEl)
-			.setName("Размер шрифта названия привычки")
-			.setDesc("px (df-habit-label)")
-			.addText((text) =>
-				text
-					.setValue(
-						this.plugin.settings.habitLabelFontSize.toString()
-					)
-					.onChange(async (val: string) => {
-						const num = parseInt(val);
-						if (!isNaN(num)) {
-							this.plugin.settings.habitLabelFontSize = num;
-							await this.plugin.saveSettings();
-						}
-					})
-			);
-
-		// --- ICONS SETTINGS ---
-		containerEl.createEl("h3", { text: "Иконки действий" });
-		containerEl.createEl("p", { text: "Используйте SVG код." });
-
+		// --- ИКОНКИ ---
+		containerEl.createEl("h3", { text: "Системные иконки" });
 		const createSvgSetting = (
 			key: keyof DailyLogSettings["icons"],
 			name: string
@@ -418,38 +292,36 @@ export class DailyLogSettingTab extends PluginSettingTab {
 			s.controlEl.style.alignItems = "flex-end";
 
 			s.addTextArea((text) => {
-				text.setPlaceholder("Вставьте SVG...")
+				text.setPlaceholder("SVG код...")
 					.setValue(this.plugin.settings.icons[key])
-					.onChange(async (value: string) => {
+					.onChange(async (value) => {
 						this.plugin.settings.icons[key] = value.trim();
 						await this.plugin.saveSettings();
 					});
 				text.inputEl.rows = 4;
+				text.inputEl.style.width = "100%";
 			});
 			s.addButton((btn) => {
-				btn.setButtonText("Предпросмотр").setClass(
-					"df-svg-preview-btn"
-				);
+				btn.setClass("df-svg-preview-btn").setButtonText("");
 				btn.buttonEl.innerHTML = this.plugin.settings.icons[key];
 			});
 		};
 
-		createSvgSetting("edit", "Иконка 'Сохранить'");
-		createSvgSetting("hoverEdit", "Иконка 'Редактировать' (карандаш)");
-		createSvgSetting("trash", "Иконка 'Удалить'");
-		createSvgSetting("cancel", "Иконка 'Отмена'");
-		createSvgSetting("dragHandle", "Иконка 'Драг-ручка'");
+		createSvgSetting("edit", "Сохранить");
+		createSvgSetting("hoverEdit", "Редактировать");
+		createSvgSetting("trash", "Удалить");
+		createSvgSetting("cancel", "Отмена");
 
-		// --- HABITS ---
-		containerEl.createEl("h3", { text: "Привычки (Habits)" });
+		// --- ПРИВЫЧКИ ---
+		containerEl.createEl("h3", { text: "Привычки" });
 		const habitsContainer = containerEl.createDiv({
 			cls: "df-list-container",
 		});
 		this.renderHabits(habitsContainer);
 
-		new Setting(containerEl).setName("Добавить привычку").addButton((btn) =>
+		new Setting(containerEl).addButton((btn) =>
 			btn
-				.setButtonText("Добавить")
+				.setButtonText("Добавить привычку")
 				.setCta()
 				.onClick(async () => {
 					this.plugin.settings.habits.push({
@@ -462,31 +334,30 @@ export class DailyLogSettingTab extends PluginSettingTab {
 				})
 		);
 
-		// --- LOG KEYS ---
-		containerEl.createEl("h3", { text: "Ключи лога (Log Keys)" });
+		// --- КЛЮЧИ ЛОГА ---
+		containerEl.createEl("h3", { text: "Ключи лога" });
 		const logKeysContainer = containerEl.createDiv({
 			cls: "df-list-container",
 		});
 		this.renderLogKeys(logKeysContainer);
 
-		new Setting(containerEl)
-			.setName("Добавить ключ лога")
-			.addButton((btn) =>
-				btn
-					.setButtonText("Добавить")
-					.setCta()
-					.onClick(async () => {
-						this.plugin.settings.logKeys.push({
-							key: "New::",
-							tags: "",
-							iconSvg: "📝",
-						});
-						await this.plugin.saveSettings();
-						this.display();
-					})
-			);
+		new Setting(containerEl).addButton((btn) =>
+			btn
+				.setButtonText("Добавить ключ")
+				.setCta()
+				.onClick(async () => {
+					this.plugin.settings.logKeys.push({
+						key: "Key::",
+						tags: "",
+						iconSvg: "📝",
+					});
+					await this.plugin.saveSettings();
+					this.display();
+				})
+		);
 	}
 
+	// --- Логика рендера списков (D&D) ---
 	renderHabits(containerEl: HTMLElement): void {
 		containerEl.empty();
 		let dragSrcEl: HTMLElement | null = null;
@@ -524,23 +395,14 @@ export class DailyLogSettingTab extends PluginSettingTab {
 					dropTargetEl.dataset.index || "-1"
 				);
 				if (dragStartIndex !== -1 && dragEndIndex !== -1) {
-					const rect = dropTargetEl.getBoundingClientRect();
-					const midpoint = rect.y + rect.height / 2;
+					// Простая логика перестановки
 					let finalIndex = dragEndIndex;
-					if (e.clientY < midpoint) finalIndex = dragEndIndex;
-					else finalIndex = dragEndIndex + 1;
-
-					if (dragStartIndex < dragEndIndex && e.clientY >= midpoint)
-						finalIndex = dragEndIndex;
-					else if (
-						dragStartIndex > dragEndIndex &&
-						e.clientY < midpoint
+					const rect = dropTargetEl.getBoundingClientRect();
+					if (
+						e.clientY > rect.y + rect.height / 2 &&
+						dragStartIndex < dragEndIndex
 					)
 						finalIndex = dragEndIndex;
-
-					if (finalIndex < 0) finalIndex = 0;
-					if (finalIndex > this.plugin.settings.habits.length)
-						finalIndex = this.plugin.settings.habits.length;
 
 					this.plugin.settings.habits = this.moveItem(
 						this.plugin.settings.habits,
@@ -555,144 +417,82 @@ export class DailyLogSettingTab extends PluginSettingTab {
 			dragSrcEl = null;
 		};
 
-		containerEl.addEventListener("dragend", () => {
-			containerEl
-				.querySelectorAll(
-					".is-dragging, .drag-over-top, .drag-over-bottom"
-				)
-				.forEach((el) =>
-					el.classList.remove(
-						"is-dragging",
-						"drag-over-top",
-						"drag-over-bottom"
-					)
-				);
-			dragSrcEl = null;
-		});
-
 		this.plugin.settings.habits.forEach((habit, index) => {
 			const setting = new Setting(containerEl)
 				.setName(habit.key || "Без названия")
 				.setClass("df-list-item-setting");
-			setting.settingEl.setAttr("draggable", "true");
-			setting.settingEl.setAttr("data-index", index.toString());
+
+			// D&D атрибуты
+			setting.settingEl.setAttribute("draggable", "true");
+			setting.settingEl.dataset.index = index.toString();
 			setting.settingEl.addEventListener("dragstart", handleDragStart);
 			setting.settingEl.addEventListener("dragover", handleDragOver);
-			setting.settingEl.addEventListener("dragleave", (e: DragEvent) =>
-				(e.currentTarget as HTMLElement).classList.remove(
-					"drag-over-top",
-					"drag-over-bottom"
-				)
-			);
 			setting.settingEl.addEventListener("drop", handleDrop);
 
+			// Ручка D&D
 			setting.addExtraButton((btn) => {
-				btn.setTooltip("Перетащить");
-				btn.extraSettingsEl.classList.add("df-drag-handle-btn");
 				btn.extraSettingsEl.innerHTML =
 					this.plugin.settings.icons.dragHandle;
-				btn.extraSettingsEl.onclick = (e) => e.preventDefault();
+				btn.extraSettingsEl.style.cursor = "grab";
 			});
-			const dragHandleEl = setting.controlEl.lastElementChild;
-			if (dragHandleEl) setting.settingEl.prepend(dragHandleEl);
 
-			setting
-				.addDropdown((dd) =>
-					dd
-						.addOption("checkbox", "Флажок")
-						.addOption("number", "Число")
-						.addOption("text", "Текст")
-						.setValue(habit.type)
-						.onChange(async (value: any) => {
-							habit.type = value;
-							await this.plugin.saveSettings();
-							this.display();
-						})
-				)
-				.addButton((btn) =>
-					(btn as any).setIcon("pencil").onClick(() => {
-						new EditHabitModal(
-							this.app,
-							habit,
-							(newKey: string, newSvg: string) => {
-								habit.key = newKey;
-								habit.iconSvg = newSvg;
-								this.plugin
-									.saveSettings()
-									.then(() => this.display());
-							}
-						).open();
-					})
-				)
-				.addButton((btn) =>
-					(btn as any).setIcon("trash").onClick(async () => {
-						this.plugin.settings.habits.splice(index, 1);
+			setting.addDropdown((dd) =>
+				dd
+					.addOption("checkbox", "Флажок")
+					.addOption("number", "Число")
+					.addOption("text", "Текст")
+					.setValue(habit.type)
+					.onChange(async (v) => {
+						habit.type = v as any;
 						await this.plugin.saveSettings();
-						this.display();
 					})
-				);
+			);
 
-			const nameEl =
-				setting.settingEl.querySelector(".setting-item-name");
-			if (nameEl) {
-				const iconPreviewEl = nameEl.createDiv({
-					cls: "df-list-icon-preview",
-				});
-				iconPreviewEl.innerHTML =
-					habit.iconSvg ||
-					(habit.type === "checkbox"
-						? this.plugin.settings.icons.edit
-						: "...");
-			}
+			setting.addButton((btn) =>
+				btn.setIcon("pencil").onClick(() => {
+					new EditHabitModal(this.app, habit, (k, s) => {
+						habit.key = k;
+						habit.iconSvg = s;
+						this.plugin.saveSettings().then(() => this.display());
+					}).open();
+				})
+			);
+
+			setting.addButton((btn) =>
+				btn.setIcon("trash").onClick(async () => {
+					this.plugin.settings.habits.splice(index, 1);
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
 		});
 	}
 
 	renderLogKeys(containerEl: HTMLElement): void {
 		containerEl.empty();
 		this.plugin.settings.logKeys.forEach((logKey, index) => {
-			const normalizedKey = this.normalizeKey(logKey.key);
 			const setting = new Setting(containerEl)
-				.setName(normalizedKey || "Без ключа")
+				.setName(logKey.key)
 				.setClass("df-list-item-setting")
-				.addText((text) =>
-					text
-						.setPlaceholder("tags")
-						.setValue(logKey.tags)
-						.onChange(async (value: string) => {
-							logKey.tags = value.trim();
-							await this.plugin.saveSettings();
-						})
-				)
-				.addButton((btn) =>
-					(btn as any).setIcon("pencil").onClick(() => {
-						new EditLogKeyModal(
-							this.app,
-							logKey,
-							(newKey: string, newSvg: string) => {
-								logKey.key = this.normalizeKey(newKey);
-								logKey.iconSvg = newSvg;
-								this.plugin
-									.saveSettings()
-									.then(() => this.display());
-							}
-						).open();
-					})
-				)
-				.addButton((btn) =>
-					(btn as any).setIcon("trash").onClick(async () => {
-						this.plugin.settings.logKeys.splice(index, 1);
-						await this.plugin.saveSettings();
-						this.display();
-					})
-				);
-			const nameEl =
-				setting.settingEl.querySelector(".setting-item-name");
-			if (nameEl) {
-				const iconPreviewEl = nameEl.createDiv({
-					cls: "df-list-icon-preview",
-				});
-				iconPreviewEl.innerHTML = logKey.iconSvg || "❓";
-			}
+				.setDesc(`Tags: ${logKey.tags || "-"}`);
+
+			setting.addButton((btn) =>
+				btn.setIcon("pencil").onClick(() => {
+					new EditLogKeyModal(this.app, logKey, (k, s) => {
+						logKey.key = this.normalizeKey(k);
+						logKey.iconSvg = s;
+						this.plugin.saveSettings().then(() => this.display());
+					}).open();
+				})
+			);
+
+			setting.addButton((btn) =>
+				btn.setIcon("trash").onClick(async () => {
+					this.plugin.settings.logKeys.splice(index, 1);
+					await this.plugin.saveSettings();
+					this.display();
+				})
+			);
 		});
 	}
 }
