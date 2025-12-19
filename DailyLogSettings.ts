@@ -221,18 +221,30 @@ export class DailyLogSettingTab extends PluginSettingTab {
 			.setDesc("px (по наведению)")
 			.addText((text) =>
 				text
-					.setPlaceholder("18")
+					.setPlaceholder(
+						DEFAULT_SETTINGS.hoverEditButtonSize.toString()
+					)
 					.setValue(
 						this.plugin.settings.hoverEditButtonSize.toString()
 					)
 					.onChange(async (value) => {
-						const num = parseInt(value.trim());
+						const num = parseFloat(value.trim());
 						if (!isNaN(num)) {
 							this.plugin.settings.hoverEditButtonSize = num;
 							await this.plugin.saveSettings();
 						}
 					})
-			);
+			)
+			.addExtraButton((btn) => {
+				btn.setIcon("reset")
+					.setTooltip("Сбросить")
+					.onClick(async () => {
+						this.plugin.settings.hoverEditButtonSize =
+							DEFAULT_SETTINGS.hoverEditButtonSize;
+						await this.plugin.saveSettings();
+						this.display();
+					});
+			});
 
 		new Setting(containerEl)
 			.setName("Цвет времени в тексте")
@@ -255,13 +267,23 @@ export class DailyLogSettingTab extends PluginSettingTab {
 						this.plugin.settings.habitLabelFontSize.toString()
 					)
 					.onChange(async (val) => {
-						const num = parseInt(val);
+						const num = parseFloat(val);
 						if (!isNaN(num)) {
 							this.plugin.settings.habitLabelFontSize = num;
 							await this.plugin.saveSettings();
 						}
 					})
-			);
+			)
+			.addExtraButton((btn) => {
+				btn.setIcon("reset")
+					.setTooltip("Сбросить")
+					.onClick(async () => {
+						this.plugin.settings.habitLabelFontSize =
+							DEFAULT_SETTINGS.habitLabelFontSize;
+						await this.plugin.saveSettings();
+						this.display();
+					});
+			});
 
 		new Setting(containerEl)
 			.setName("Отступ между привычками")
@@ -270,13 +292,23 @@ export class DailyLogSettingTab extends PluginSettingTab {
 				text
 					.setValue(this.plugin.settings.habitsGap.toString())
 					.onChange(async (val) => {
-						const num = parseInt(val);
+						const num = parseFloat(val);
 						if (!isNaN(num)) {
 							this.plugin.settings.habitsGap = num;
 							await this.plugin.saveSettings();
 						}
 					})
-			);
+			)
+			.addExtraButton((btn) => {
+				btn.setIcon("reset")
+					.setTooltip("Сбросить")
+					.onClick(async () => {
+						this.plugin.settings.habitsGap =
+							DEFAULT_SETTINGS.habitsGap;
+						await this.plugin.saveSettings();
+						this.display();
+					});
+			});
 
 		// --- ИКОНКИ ---
 		containerEl.createEl("h3", { text: "Системные иконки" });
